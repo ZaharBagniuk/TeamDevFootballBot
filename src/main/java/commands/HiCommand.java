@@ -1,4 +1,4 @@
-package src.commands;
+package commands;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -9,25 +9,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class ByeCommand extends AbstractCommand {
+public class HiCommand extends AbstractCommand {
 
-    public ByeCommand() {
-        super("bye","say bye to bot\n");
+    public HiCommand() {
+        super("hi", "say hi to bot\n");
     }
 
     @Override
     public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
         SendMessage message = new SendMessage();
-        message.setChatId(chat.getId().toString());
-        List<String> footballers = new ArrayList<String>(){{
-            add("Messi");
-            add("Iniesta");
-            add("Xavi");
-            add("Dybala");
+        message.setChatId(chat.getId()
+                              .toString());
+        List<String> footballers = new ArrayList<String>() {{
+            add("Ronaldo");
+            add("Higuain");
+            add("Konoplyanka");
+            add("Zinchenko");
+            add("Kane");
         }};
         Random rand = new Random();
         String randomElement = footballers.get(rand.nextInt(footballers.size()));
-        message.setText("Bye my little " + user.getFirstName() + " " + randomElement + "...c u...");
+        message.setText("Hi sexy " + user.getFirstName() + " " + randomElement + " !");
         execute(sender, message, user);
     }
 }

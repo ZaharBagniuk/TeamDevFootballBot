@@ -1,5 +1,8 @@
-package src;
-
+import commands.ByeCommand;
+import commands.HelpCommand;
+import commands.HiCommand;
+import commands.ReadVotesCommand;
+import commands.VoteCommand;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -7,21 +10,19 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import src.commands.ByeCommand;
-import src.commands.HiCommand;
-import src.commands.HelpCommand;
 
 public class Bot extends TelegramLongPollingCommandBot {
 
     private static final String BOT_NAME = "@TeamDevFootballBot";
     private static final String BOT_TOKEN = "888166484:AAFar0ScoX8AqJ7ifB94BUaPimn00ZIPqCY";
 
-
     public Bot(DefaultBotOptions botOptions) {
         super(botOptions, BOT_NAME);
 
         register(new ByeCommand());
         register(new HiCommand());
+        register(new ReadVotesCommand());
+        register(new VoteCommand());
         HelpCommand helpCommand = new HelpCommand(this);
         register(helpCommand);
 
@@ -36,7 +37,7 @@ public class Bot extends TelegramLongPollingCommandBot {
             } catch (TelegramApiException e) {
             }
 
-            helpCommand.execute(absSender, message.getFrom(), message.getChat(), new String[] {});
+            helpCommand.execute(absSender, message.getFrom(), message.getChat(), new String[]{});
         }));
     }
 
@@ -70,7 +71,9 @@ public class Bot extends TelegramLongPollingCommandBot {
         SendMessage answer = new SendMessage();
         answer.setChatId(msg.getChatId());
 
-        if (!msg.hasText() || msg.getText().trim().length() == 0) {
+        if (!msg.hasText() || msg.getText()
+                                 .trim()
+                                 .length() == 0) {
             answer.setText("You shouldn't send empty messages!");
             replyToUser(answer, user, msg.getText());
             return false;
