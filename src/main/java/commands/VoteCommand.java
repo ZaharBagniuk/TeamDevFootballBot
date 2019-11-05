@@ -24,7 +24,7 @@ public class VoteCommand extends AbstractCommand {
     public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
         Sheets sheetsService = null;
         ValueRange response = null;
-        String spreadsheetId = "1SIwXULzoQxtW_2dDPO7-uGwTgNsfwXofbktL4sijnDo";
+        String spreadsheetId = "1hx0iBtrJwcp5rMZre-OZYd6D-Og77Mw1nS0z7Tyh3TM";
         String rangeFoVote = "";
         try {
             response = SheetsServiceUtil.getSheetsService().spreadsheets()

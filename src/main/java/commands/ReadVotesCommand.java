@@ -28,7 +28,7 @@ public class ReadVotesCommand extends AbstractCommand {
         // Build a new authorized API client service.
         ValueRange response = null;
         Sheets service;
-        String spreadsheetId = "1SIwXULzoQxtW_2dDPO7-uGwTgNsfwXofbktL4sijnDo";
+        String spreadsheetId = "1hx0iBtrJwcp5rMZre-OZYd6D-Og77Mw1nS0z7Tyh3TM";
         try {
             service = SheetsServiceUtil.getSheetsService();
 
