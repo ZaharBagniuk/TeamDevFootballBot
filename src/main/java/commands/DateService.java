@@ -1,9 +1,10 @@
 package commands;
 
-import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -13,27 +14,30 @@ public class DateService {
 
     public static int getDateColumnNumber(String id) {
         ValueRange response;
-        int dateColumnNumber = 0;
+        int dateColumnNumber = 1;
         try {
-            final String rangeForDates = "Test!B3:Z3";
+            final String rangeForDates = "Osen' - 2019!C2:O2";
             response = SheetsServiceUtil.getSheetsService().spreadsheets()
                               .values()
                               .get(id, rangeForDates)
+                                        .setValueRenderOption("UNFORMATTED_VALUE")
                               .execute();
             List<List<Object>> values = response.getValues();
-            SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
             List<Date> dates = new ArrayList<>();
             Date currentDate = new Date();
             int counter = 1;
             boolean isFirst = true;
-            for (Object date : values.get(0)) {
-                Date dateObj = formatter.parse(date.toString());
-                if (compareTwoDates(currentDate, dateObj) <= 0 && isFirst) {
-                    dates.add(dateObj);
-                    dateColumnNumber = counter;
-                    isFirst = false;
+            for (List row : values) {
+                for (Object columnFromRow : row) {
+                    LocalDate localDate = LocalDate.of(1899, Month.DECEMBER, 30).plusDays(convertToLong(columnFromRow));
+                    Date dateObj = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                    if (compareTwoDates(currentDate, dateObj) <= 0 && isFirst) {
+                        dates.add(dateObj);
+                        dateColumnNumber = counter;
+                        isFirst = false;
+                    }
+                    counter++;
                 }
-                counter++;
             }
 
         } catch (Exception e) {
@@ -79,5 +83,12 @@ public class DateService {
         } else {
             return toAlphabetic(quot-1) + letter;
         }
+    }
+
+    public static Long convertToLong(Object o){
+        String stringToConvert = String.valueOf(o);
+        Long convertedLong = Long.parseLong(stringToConvert);
+        return convertedLong;
+
     }
 }

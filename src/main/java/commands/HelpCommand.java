@@ -29,6 +29,6 @@ public class HelpCommand extends AbstractCommand {
         helpMessage.enableHtml(true);
         helpMessage.setText(helpMessageBuilder.toString());
 
-        execute(absSender, helpMessage, user);
+        execute(absSender, helpMessage);
     }
 }

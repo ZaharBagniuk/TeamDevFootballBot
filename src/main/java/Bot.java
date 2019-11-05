@@ -2,27 +2,36 @@ import commands.ByeCommand;
 import commands.HelpCommand;
 import commands.HiCommand;
 import commands.ReadVotesCommand;
+import commands.StartCommand;
+import commands.UnvoteCommand;
 import commands.VoteCommand;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class Bot extends TelegramLongPollingCommandBot {
 
     private static final String BOT_NAME = "@TeamDevFootballBot";
     private static final String BOT_TOKEN = "888166484:AAFar0ScoX8AqJ7ifB94BUaPimn00ZIPqCY";
+    private final ReadVotesCommand readVotesCommand = new ReadVotesCommand();
+    private final VoteCommand voteCommand = new VoteCommand();
+    private final UnvoteCommand unvoteCommand = new UnvoteCommand();
 
     public Bot(DefaultBotOptions botOptions) {
         super(botOptions, BOT_NAME);
 
         register(new ByeCommand());
         register(new HiCommand());
-        register(new ReadVotesCommand());
-        register(new VoteCommand());
+        register(this.readVotesCommand);
+        register(new StartCommand());
+        register(this.voteCommand);
+        register(this.unvoteCommand);
         HelpCommand helpCommand = new HelpCommand(this);
         register(helpCommand);
 
@@ -43,56 +52,46 @@ public class Bot extends TelegramLongPollingCommandBot {
 
     @Override
     public void processNonCommandUpdate(Update update) {
+        if(update.hasCallbackQuery()) {
+            try {
+                String message = update.getCallbackQuery()
+                                    .getData();
+                SendMessage sendMessage = new SendMessage().setText(
+                        message).setChatId(update.getCallbackQuery()
+                                                 .getMessage()
+                                                 .getChatId());
+                execute(sendMessage);
+                User user = update.getCallbackQuery()
+                                  .getFrom();
+                Chat chat = update.getCallbackQuery().getMessage().getChat();
+                if (message.startsWith("God grant you health! See ya on football")) {
+                    voteCommand.execute(this, user, chat, new String[]{});
+                } else if (message.startsWith("Current football team")) {
+                    readVotesCommand.execute(this, user, chat, new String[]{});
+                } else if (message.startsWith("Well.. See ya next time")) {
+                    unvoteCommand.execute(this, user, chat, new String[]{});
+                }
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
+        } else {
+            if (!update.hasMessage()) {
+                throw new IllegalStateException("Update doesn't have a body!");
+            }
 
-        if (!update.hasMessage()) {
-            throw new IllegalStateException("Update doesn't have a body!");
-        }
+            Message msg = update.getMessage();
 
-        Message msg = update.getMessage();
-        User user = msg.getFrom();
+            String clearMessage = msg.getText();
 
-        if (!canSendMessage(user, msg)) {
-            return;
-        }
+            SendMessage answer = new SendMessage();
 
-        String clearMessage = msg.getText();
-        String messageForUsers = String.format("%s:\n%s", user.getFirstName(), msg.getText());
-
-        SendMessage answer = new SendMessage();
-
-        // отправка ответа отправителю о том, что его сообщение получено
-        answer.setText(clearMessage);
-        answer.setChatId(msg.getChatId());
-        replyToUser(answer, user, clearMessage);
-    }
-
-    private boolean canSendMessage(User user, Message msg) {
-
-        SendMessage answer = new SendMessage();
-        answer.setChatId(msg.getChatId());
-
-        if (!msg.hasText() || msg.getText()
-                                 .trim()
-                                 .length() == 0) {
-            answer.setText("You shouldn't send empty messages!");
-            replyToUser(answer, user, msg.getText());
-            return false;
-        }
-
-        return true;
-    }
-
-    private void sendMessageToUser(SendMessage message, User receiver, User sender) {
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
-        }
-    }
-
-    private void replyToUser(SendMessage message, User user, String messageText) {
-        try {
-            execute(message);
-        } catch (TelegramApiException e) {
+            answer.setText(clearMessage);
+            answer.setChatId(msg.getChatId());
+            try {
+                execute(answer);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+            }
         }
     }
 

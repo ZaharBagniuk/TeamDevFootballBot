@@ -29,6 +29,6 @@ public class ByeCommand extends AbstractCommand {
         Random rand = new Random();
         String randomElement = footballers.get(rand.nextInt(footballers.size()));
         message.setText("Bye " + user.getFirstName() + " " + randomElement + "...");
-        execute(sender, message, user);
+        execute(sender, message);
     }
 }

@@ -1,7 +1,5 @@
 package commands;
 
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,18 +17,22 @@ public class ReadVotesCommand extends AbstractCommand {
 
     @Override
     public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
+        execute(sender, getVotes(chat));
+    }
+
+    public SendMessage getVotes(Chat chat) {
         SendMessage message = new SendMessage();
         message.setChatId(chat.getId()
                               .toString());
 
         // Build a new authorized API client service.
         ValueRange response = null;
-        Sheets service = null;
+        Sheets service;
         String spreadsheetId = "1SIwXULzoQxtW_2dDPO7-uGwTgNsfwXofbktL4sijnDo";
         try {
             service = SheetsServiceUtil.getSheetsService();
 
-            final String range = "Test!A4:Z6";
+            final String range = "Osen' - 2019!B5:O21";
             response = service.spreadsheets()
                               .values()
                               .get(spreadsheetId, range)
@@ -46,21 +48,26 @@ public class ReadVotesCommand extends AbstractCommand {
             String namesVotes = "";
             String vote = "";
             int counter = 0;
+            int dateColumnNumber = DateService.getDateColumnNumber(spreadsheetId);
+            String naturals = "";
+            String gays = "";
             for (List row : values) {
-                if (row.get(DateService.getDateColumnNumber(spreadsheetId))
-                       .toString()
-                       .equals("TRUE")) {
+                if (row.get(dateColumnNumber).toString().equals("TRUE")) {
                     counter++;
-                    vote = "\u2713";
+                    vote = "+";
+                    naturals += vote + "  " + row.get(0)
+                                                   .toString() + "\n";
                 } else {
-                    vote = "X";
+                    vote = "-";
+                    gays += vote + "  " + row.get(0)
+                                             .toString() + "\n";
                 }
-                namesVotes += row.get(0)
-                                 .toString() + " : " + vote + "\n";
             }
-            namesVotes += "Summary : " + counter;
+            namesVotes = "Who will be:\n" + naturals;
+            namesVotes += "\nWho not will be:\n" + gays;
+            namesVotes += "\nSummary : " + counter;
             message.setText(namesVotes);
         }
-        execute(sender, message, user);
+        return message;
     }
 }

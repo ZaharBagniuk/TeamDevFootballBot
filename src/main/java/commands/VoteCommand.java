@@ -1,7 +1,6 @@
 package commands;
 
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
@@ -13,10 +12,11 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 
-@SuppressWarnings("ALL")
+@SuppressWarnings("Duplicates")
 public class VoteCommand extends AbstractCommand {
 
     public VoteCommand() {
+
         super("vote", "Vote for yourself!\n");
     }
 
@@ -29,19 +29,20 @@ public class VoteCommand extends AbstractCommand {
         try {
             response = SheetsServiceUtil.getSheetsService().spreadsheets()
                               .values()
-                              .get(spreadsheetId, "Test!A4:A6")
+                              .get(spreadsheetId, "Osen' - 2019!B5:B21")
                               .execute();
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
         }
         int dateColumnNumber = DateService.getDateColumnNumber(spreadsheetId);
-        String dateColumnLetter = DateService.toAlphabetic(dateColumnNumber);
+        String dateColumnLetter = DateService.toAlphabetic(dateColumnNumber + 1);
         int userNamePosition = 0;
         String userName = user.getFirstName() + " " + user.getLastName();
         List<List<Object>> values = response.getValues();
-        int counter = 4;
+        int counter = 5;
         for (List row : values) {
-            if (row.get(0).equals(userName)) {
+            String nameFromTable = row.get(0).toString();
+            if (nameFromTable.trim().equals(userName)) {
                 userNamePosition = counter;
             }
             counter++;
@@ -62,7 +63,7 @@ public class VoteCommand extends AbstractCommand {
                     .setValues(Arrays.asList(
                             Arrays.asList("TRUE")));
             try {
-                String rangeForVote = dateColumnLetter + userNamePosition + ":" + dateColumnLetter +
+                String rangeForVote = "Osen' - 2019!" + dateColumnLetter + userNamePosition + ":" + dateColumnLetter +
                         userNamePosition;
                 sheetsService.spreadsheets()
                              .values()
@@ -75,8 +76,9 @@ public class VoteCommand extends AbstractCommand {
                 e.printStackTrace();
             }
         } else {
-            message.setText("Such sexy user not found: " + userName + ".");
-            execute(sender, message, user);
+            message.setText("Such sexy user not found: " + userName + "." +
+                                    " Check the correspondence of the name in the telegram and google table");
+            execute(sender, message);
         }
     }
 }
