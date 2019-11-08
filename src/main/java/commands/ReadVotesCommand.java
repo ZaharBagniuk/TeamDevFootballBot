@@ -39,7 +39,7 @@ public class ReadVotesCommand extends AbstractCommand {
                               .execute();
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         List<List<Object>> values = response.getValues();
         if (values == null || values.isEmpty()) {

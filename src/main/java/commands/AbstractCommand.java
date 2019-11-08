@@ -15,7 +15,7 @@ public abstract class AbstractCommand extends BotCommand {
         try {
             sender.execute(message);
         } catch (TelegramApiException e) {
-            System.out.println("error from abstract command");
+            e.printStackTrace();
         }
     }
 }

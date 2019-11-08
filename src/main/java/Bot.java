@@ -44,6 +44,7 @@ public class Bot extends TelegramLongPollingCommandBot {
             try {
                 absSender.execute(text);
             } catch (TelegramApiException e) {
+                e.printStackTrace();
             }
 
             helpCommand.execute(absSender, message.getFrom(), message.getChat(), new String[]{});

@@ -41,7 +41,7 @@ public class DateService {
             }
 
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
 
         return dateColumnNumber;
